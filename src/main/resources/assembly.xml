@@ -1,0 +1,13 @@
+<dependencySets>
+    <dependencySet>
+        <useProjectArtifact>false</useProjectArtifact>
+        <scope>runtime</scope>
+        <outputDirectory>lib</outputDirectory>
+        <includes>
+            <include>*:jar:*</include>
+        </includes>
+        <excludes>
+            <exclude>org.slf4j:*</exclude>
+        </excludes>
+    </dependencySet>
+</dependencySets>
