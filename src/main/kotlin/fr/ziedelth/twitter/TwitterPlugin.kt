@@ -7,6 +7,8 @@ import org.pf4j.PluginWrapper
 import twitter4j.Twitter
 import java.io.File
 
+private const val CONFIG_FILE_ERROR = "Please fill the config file before restarting the plugin."
+
 class TwitterPlugin(wrapper: PluginWrapper) : JaisPlugin(wrapper) {
     override fun start() {
         if (!dataFolder.exists()) {
@@ -20,13 +22,15 @@ class TwitterPlugin(wrapper: PluginWrapper) : JaisPlugin(wrapper) {
             println("Creating config file...")
             file.createNewFile()
             file.writeText(gson.toJson(Configuration()))
-            throw RuntimeException("Please fill the config file before restarting the plugin.")
+            println(CONFIG_FILE_ERROR)
+            throw RuntimeException(CONFIG_FILE_ERROR)
         }
 
         val config = gson.fromJson(file.readText(), Configuration::class.java)
 
         if (!config.isValid()) {
-            throw RuntimeException("Please fill the config file before restarting the plugin.")
+            println(CONFIG_FILE_ERROR)
+            throw RuntimeException(CONFIG_FILE_ERROR)
         }
 
         println("Starting TwitterTemplate...")
@@ -38,8 +42,12 @@ class TwitterPlugin(wrapper: PluginWrapper) : JaisPlugin(wrapper) {
             twitter?.v1()?.tweets()?.lookup(1588739131815112704)
 
             ListenerManager(twitter)
+            println("Started TwitterTemplate.")
         } catch (e: Exception) {
-            throw RuntimeException("An error occurred while creating the Twitter instance. Please check your credentials.")
+            val errorMessage = "An error occurred while creating the Twitter instance. Please check your credentials."
+
+            println(errorMessage)
+            throw RuntimeException(errorMessage)
         }
     }
 }
