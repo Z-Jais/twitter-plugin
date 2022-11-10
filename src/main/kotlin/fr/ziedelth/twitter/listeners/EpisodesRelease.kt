@@ -27,7 +27,19 @@ class EpisodesRelease(private val twitter: Twitter) : Listener {
 
                 val statusUpdate = StatusUpdate.of("\uD83C\uDF89 ${episode.anime?.name}\n" +
                         "${episode.title?.ifBlank { "＞﹏＜" } ?: "＞﹏＜"}\n" +
-                        "\n" +
+                        "Saison ${episode.season} • ${
+                            when (episode.episodeType?.name) {
+                                "SPECIAL" -> "Spécial"
+                                "MOVIE" -> "Film"
+                                else -> "Épisode"
+                            }
+                        } ${episode.number} ${
+                            when (episode.langType?.name) {
+                                "SUBTITLES" -> "VOSTFR"
+                                "VOICE" -> "VF"
+                                else -> ""
+                            }
+                        }\n" +
                         getTinyUrl(episode.url))
                 statusUpdate.mediaIds(uploadedMedia.mediaId)
                 twitter.v1().tweets().updateStatus(statusUpdate)
