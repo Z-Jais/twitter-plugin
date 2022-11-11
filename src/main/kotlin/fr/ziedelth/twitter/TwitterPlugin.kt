@@ -4,7 +4,8 @@ import com.google.gson.GsonBuilder
 import fr.ziedelth.twitter.listeners.ListenerManager
 import fr.ziedelth.utils.plugins.JaisPlugin
 import org.pf4j.PluginWrapper
-import twitter4j.Twitter
+import twitter4j.TwitterFactory
+import twitter4j.conf.ConfigurationBuilder
 import java.io.File
 
 private const val CONFIG_FILE_ERROR = "Please fill the config file before restarting the plugin."
@@ -36,10 +37,17 @@ class TwitterPlugin(wrapper: PluginWrapper) : JaisPlugin(wrapper) {
         println("Starting TwitterTemplate...")
 
         try {
-            val twitter = Twitter.newBuilder().oAuthConsumer(config.oAuthConsumerKey, config.oAuthConsumerSecret)
-                .oAuthAccessToken(config.oAuthAccessToken, config.oAuthAccessTokenSecret).build()
+            val twitter = TwitterFactory(
+                ConfigurationBuilder()
+                    .setDebugEnabled(true)
+                    .setOAuthConsumerKey(config.oAuthConsumerKey)
+                    .setOAuthConsumerSecret(config.oAuthConsumerSecret)
+                    .setOAuthAccessToken(config.oAuthAccessToken)
+                    .setOAuthAccessTokenSecret(config.oAuthAccessTokenSecret)
+                    .build()
+            ).instance
             // Test the connection
-            twitter?.v1()?.tweets()?.lookup(1588739131815112704)
+            twitter?.tweets()?.lookup(1588739131815112704)
 
             ListenerManager(twitter)
             println("Started TwitterTemplate.")

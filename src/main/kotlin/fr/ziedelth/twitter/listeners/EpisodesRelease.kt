@@ -3,29 +3,34 @@ package fr.ziedelth.twitter.listeners
 import fr.ziedelth.events.EpisodesReleaseEvent
 import fr.ziedelth.utils.plugins.events.EventHandler
 import fr.ziedelth.utils.plugins.events.Listener
+import twitter4j.StatusUpdate
 import twitter4j.Twitter
-import twitter4j.v1.StatusUpdate
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.net.URL
 import java.util.*
+import javax.imageio.ImageIO
 
 class EpisodesRelease(private val twitter: Twitter) : Listener {
     private fun getTinyUrl(url: String?) = URL("https://urlz.fr/api_new.php?url=$url").readText()
 
     @EventHandler
     fun onEpisodesRelease(event: EpisodesReleaseEvent) {
+        val tweets = twitter.tweets()
+
         event.episodes.forEach { episode ->
             try {
-                val uploadedMedia = this.twitter.v1().tweets().uploadMedia(
+                val bufferedImage = ImageIO.read(URL(episode.image))
+                val baos = ByteArrayOutputStream()
+                ImageIO.write(bufferedImage, "jpg", baos)
+                val inputStream = ByteArrayInputStream(baos.toByteArray())
+
+                val media = tweets.uploadMedia(
                     "${UUID.randomUUID().toString().replace("-", "")}.jpg",
-                    URL(episode.image).openStream()
+                    inputStream
                 )
 
-                if (uploadedMedia == null) {
-                    println("An error occurred while uploading the media.")
-                    return
-                }
-
-                val statusUpdate = StatusUpdate.of("\uD83C\uDF89 ${episode.anime?.name}\n" +
+                val statusUpdate = StatusUpdate("\uD83C\uDF89 ${episode.anime?.name}\n" +
                         "${episode.title?.ifBlank { "＞﹏＜" } ?: "＞﹏＜"}\n" +
                         "Saison ${episode.season} • ${
                             when (episode.episodeType?.name) {
@@ -40,9 +45,10 @@ class EpisodesRelease(private val twitter: Twitter) : Listener {
                                 else -> ""
                             }
                         }\n" +
-                        getTinyUrl(episode.url))
-                statusUpdate.mediaIds(uploadedMedia.mediaId)
-                twitter.v1().tweets().updateStatus(statusUpdate)
+                        "URL : ${getTinyUrl(episode.url)}"
+                )
+                statusUpdate.setMediaIds(media.mediaId)
+                tweets.updateStatus(statusUpdate)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
