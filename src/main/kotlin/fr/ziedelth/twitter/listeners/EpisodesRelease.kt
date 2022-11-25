@@ -50,7 +50,7 @@ class EpisodesRelease(private val twitter: Twitter) : Listener {
                         "Saison ${episode.season} • ${
                             when (episode.episodeType?.name) {
                                 "SPECIAL" -> "Spécial"
-                                "MOVIE" -> "Film"
+                                "FILM" -> "Film"
                                 else -> "Épisode"
                             }
                         } ${episode.number} ${
