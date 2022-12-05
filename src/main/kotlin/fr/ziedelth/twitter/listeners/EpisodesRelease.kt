@@ -19,15 +19,19 @@ class EpisodesRelease(private val twitter: Twitter) : Listener {
     private fun String.onlyLettersAndDigits(): String = this.filter { it.isLetterOrDigit() }
 
     private fun getTinyUrl(url: String?): String {
-        // URL("https://urlz.fr/api_new.php?url=$url").readText()
-
-        return HttpClient.newHttpClient().send(
+        val response = HttpClient.newHttpClient().send(
             HttpRequest.newBuilder()
                 .uri(URI.create("https://zdh.fr/"))
                 .POST(HttpRequest.BodyPublishers.ofString("$url"))
                 .build(),
             HttpResponse.BodyHandlers.ofString()
-        ).body()
+        )
+
+        if (response.statusCode() != 200) {
+            return URL("https://urlz.fr/api_new.php?url=$url").readText()
+        }
+
+        return response.body()
     }
 
     @EventHandler
@@ -46,7 +50,7 @@ class EpisodesRelease(private val twitter: Twitter) : Listener {
                     inputStream
                 )
 
-                val statusUpdate = StatusUpdate("\uD83C\uDF89 ${episode.anime?.name}\n" +
+                val s = "\uD83C\uDF89 #${episode.anime?.name?.onlyLettersAndDigits()}\n" +
                         "Saison ${episode.season} • ${
                             when (episode.episodeType?.name) {
                                 "SPECIAL" -> "Spécial"
@@ -61,8 +65,11 @@ class EpisodesRelease(private val twitter: Twitter) : Listener {
                             }
                         }\n" +
                         "URL : ${getTinyUrl(episode.url)}\n" +
-                        "#Anime #${episode.platform?.name?.onlyLettersAndDigits()} #${episode.anime?.name?.onlyLettersAndDigits()}"
-                )
+                        "#Anime #${episode.platform?.name?.onlyLettersAndDigits()}"
+                println(s)
+
+                val statusUpdate = StatusUpdate(s)
+
                 statusUpdate.setMediaIds(media.mediaId)
                 tweets.updateStatus(statusUpdate)
             } catch (e: Exception) {
