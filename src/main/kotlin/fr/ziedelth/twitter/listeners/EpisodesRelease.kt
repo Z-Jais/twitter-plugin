@@ -1,5 +1,6 @@
 package fr.ziedelth.twitter.listeners
 
+import fr.ziedelth.entities.Episode
 import fr.ziedelth.events.EpisodesReleaseEvent
 import fr.ziedelth.utils.plugins.events.EventHandler
 import fr.ziedelth.utils.plugins.events.Listener
@@ -34,6 +35,31 @@ class EpisodesRelease(private val twitter: Twitter) : Listener {
         return response.body()
     }
 
+    private fun information(episode: Episode): String {
+        return "Saison ${episode.season} • ${
+            when (episode.episodeType?.name) {
+                "SPECIAL" -> "Spécial"
+                "FILM" -> "Film"
+                else -> "Épisode"
+            }
+        } ${episode.number} ${
+            when (episode.langType?.name) {
+                "SUBTITLES" -> "VOSTFR"
+                "VOICE" -> "VF"
+                else -> ""
+            }
+        }"
+    }
+
+    private fun platformAccount(episode: Episode): String {
+        return when(episode.platform?.name) {
+            "Animation Digital Network" -> "@ADNanime"
+            "Crunchyroll" -> "@Crunchyroll_fr"
+            "Netflix" -> "@NetflixFR"
+            else -> "${episode.platform?.name}"
+        }
+    }
+
     @EventHandler
     fun onEpisodesRelease(event: EpisodesReleaseEvent) {
         val tweets = twitter.tweets()
@@ -51,21 +77,10 @@ class EpisodesRelease(private val twitter: Twitter) : Listener {
                 )
 
                 val s = "\uD83C\uDF89 #${episode.anime?.name?.onlyLettersAndDigits()}\n" +
-                        "Saison ${episode.season} • ${
-                            when (episode.episodeType?.name) {
-                                "SPECIAL" -> "Spécial"
-                                "FILM" -> "Film"
-                                else -> "Épisode"
-                            }
-                        } ${episode.number} ${
-                            when (episode.langType?.name) {
-                                "SUBTITLES" -> "VOSTFR"
-                                "VOICE" -> "VF"
-                                else -> ""
-                            }
-                        }\n" +
-                        "URL : ${getTinyUrl(episode.url)}\n" +
-                        "#Anime #${episode.platform?.name?.onlyLettersAndDigits()}"
+                        "${information(episode)}, maintenant disponible sur ${platformAccount(episode)}\n" +
+                        "\n" +
+                        "${getTinyUrl(episode.url)}\n" +
+                        "#Anime"
                 println(s)
 
                 val statusUpdate = StatusUpdate(s)
