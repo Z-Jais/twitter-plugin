@@ -1,4 +1,4 @@
-package fr.ziedelth.twitter
+package fr.ziedelth.twitter.config
 
 data class Configuration(
     val oAuthConsumerKey: String = "",

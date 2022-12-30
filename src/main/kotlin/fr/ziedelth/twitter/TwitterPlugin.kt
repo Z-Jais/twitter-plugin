@@ -1,12 +1,18 @@
 package fr.ziedelth.twitter
 
 import com.google.gson.GsonBuilder
+import fr.ziedelth.twitter.config.Configuration
 import fr.ziedelth.twitter.listeners.ListenerManager
 import fr.ziedelth.utils.plugins.JaisPlugin
 import org.pf4j.PluginWrapper
 import twitter4j.TwitterFactory
 import twitter4j.conf.ConfigurationBuilder
 import java.io.File
+import java.net.URI
+import java.net.URL
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
 
 private const val CONFIG_FILE_ERROR = "Please fill the config file before restarting the plugin."
 
@@ -49,7 +55,7 @@ class TwitterPlugin(wrapper: PluginWrapper) : JaisPlugin(wrapper) {
             // Test the connection
             twitter?.tweets()?.lookup(1588739131815112704)
 
-            ListenerManager(twitter)
+            ListenerManager(this, twitter)
             println("Started TwitterTemplate.")
         } catch (e: Exception) {
             val errorMessage = "An error occurred while creating the Twitter instance. Please check your credentials."
@@ -57,5 +63,21 @@ class TwitterPlugin(wrapper: PluginWrapper) : JaisPlugin(wrapper) {
             println(errorMessage)
             throw RuntimeException(errorMessage)
         }
+    }
+
+    fun getTinyUrl(url: String?): String {
+        val response = HttpClient.newHttpClient().send(
+            HttpRequest.newBuilder()
+                .uri(URI.create("https://zdh.fr/"))
+                .POST(HttpRequest.BodyPublishers.ofString("$url"))
+                .build(),
+            HttpResponse.BodyHandlers.ofString()
+        )
+
+        if (response.statusCode() != 200) {
+            return URL("https://urlz.fr/api_new.php?url=$url").readText()
+        }
+
+        return response.body()
     }
 }
