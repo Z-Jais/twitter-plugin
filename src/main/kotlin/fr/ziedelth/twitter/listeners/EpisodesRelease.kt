@@ -59,13 +59,11 @@ class EpisodesRelease(private val twitterPlugin: TwitterPlugin, private val twit
 
                 val s = "\uD83C\uDF89 #${episode.anime?.name?.onlyLettersAndDigits()}\n" +
                         "${information(episode)}, maintenant disponible sur ${platformAccount(episode)}\n" +
-                        "\n" +
-                        "${twitterPlugin.getTinyUrl(episode.url)}\n" +
+                        "▶️ ${twitterPlugin.getTinyUrl(episode.url)}\n" +
                         "#Anime"
                 println(s)
 
                 val statusUpdate = StatusUpdate(s)
-
                 statusUpdate.setMediaIds(media.mediaId)
                 tweets.updateStatus(statusUpdate)
             } catch (e: Exception) {
