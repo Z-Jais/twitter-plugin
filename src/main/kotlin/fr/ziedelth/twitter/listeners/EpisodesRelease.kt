@@ -17,13 +17,11 @@ class EpisodesRelease(private val twitterPlugin: TwitterPlugin, private val twit
     private fun String.onlyLettersAndDigits(): String = this.filter { it.isLetterOrDigit() }
 
     private fun information(episode: Episode): String {
-        return "${episode.season} • ${
-            when (episode.episodeType?.name) {
-                "SPECIAL" -> "L'épisode spécial"
-                "FILM" -> "Le film"
-                else -> "L'épisode ${episode.number}"
-            }
-        }"
+        return when (episode.episodeType?.name) {
+            "SPECIAL" -> "L'épisode spécial"
+            "FILM" -> "Le film"
+            else -> "L'épisode ${episode.number}"
+        }
     }
 
     private fun platformAccount(episode: Episode): String {
