@@ -17,17 +17,11 @@ class EpisodesRelease(private val twitterPlugin: TwitterPlugin, private val twit
     private fun String.onlyLettersAndDigits(): String = this.filter { it.isLetterOrDigit() }
 
     private fun information(episode: Episode): String {
-        return "Saison ${episode.season} • ${
+        return "${episode.season} • ${
             when (episode.episodeType?.name) {
-                "SPECIAL" -> "Spécial"
-                "FILM" -> "Film"
-                else -> "Épisode"
-            }
-        } ${episode.number} ${
-            when (episode.langType?.name) {
-                "SUBTITLES" -> "VOSTFR"
-                "VOICE" -> "VF"
-                else -> ""
+                "SPECIAL" -> "L'épisode spécial"
+                "FILM" -> "Le film"
+                else -> "L'épisode ${episode.number}"
             }
         }"
     }
@@ -57,10 +51,13 @@ class EpisodesRelease(private val twitterPlugin: TwitterPlugin, private val twit
                     inputStream
                 )
 
-                val s = "\uD83C\uDF89 #${episode.anime?.name?.onlyLettersAndDigits()}\n" +
-                        "${information(episode)}, maintenant disponible sur ${platformAccount(episode)}\n" +
-                        "▶️ ${twitterPlugin.getTinyUrl(episode.url)}\n" +
-                        "#Anime"
+                val isVoice = if (episode.langType?.name == "VOICE") " en VF" else ""
+
+                val s = "📺 C'est parti !\n" +
+                        "\n" +
+                        "${information(episode)} de l'anime \"#${episode.anime?.name?.onlyLettersAndDigits()}\" est enfin disponible$isVoice, ne ratez pas ça ! Bon visionnage à tous avec ${platformAccount(episode)} 🔥\n" +
+                        "\n" +
+                        "▶️ ${twitterPlugin.getTinyUrl(episode.url)}"
                 println(s)
 
                 val statusUpdate = StatusUpdate(s)
