@@ -7,11 +7,10 @@ import fr.ziedelth.utils.plugins.events.EventHandler
 import fr.ziedelth.utils.plugins.events.Listener
 import twitter4j.StatusUpdate
 import twitter4j.Twitter
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
+import java.io.InputStream
 import java.net.URL
+import java.nio.file.Files
 import java.util.*
-import javax.imageio.ImageIO
 
 class EpisodesRelease(private val twitterPlugin: TwitterPlugin, private val twitter: Twitter) : Listener {
     private fun String.onlyLettersAndDigits(): String = this.filter { it.isLetterOrDigit() }
@@ -33,16 +32,21 @@ class EpisodesRelease(private val twitterPlugin: TwitterPlugin, private val twit
         }
     }
 
+    private fun saveImage(string: String?): InputStream {
+        val inputStream = URL(string).openStream()
+        val tmpFile = Files.createTempFile(UUID.randomUUID().toString(), ".jpg").toFile()
+        val outputStream = tmpFile.outputStream()
+        outputStream.use { inputStream.copyTo(it) }
+        return tmpFile.inputStream()
+    }
+
     @EventHandler
     fun onEpisodesRelease(event: EpisodesReleaseEvent) {
         val tweets = twitter.tweets()
 
         event.episodes.forEach { episode ->
             try {
-                val bufferedImage = ImageIO.read(URL(episode.image))
-                val baos = ByteArrayOutputStream()
-                ImageIO.write(bufferedImage, "jpg", baos)
-                val inputStream = ByteArrayInputStream(baos.toByteArray())
+                val inputStream = saveImage(episode.image)
 
                 val media = tweets.uploadMedia(
                     "${UUID.randomUUID().toString().replace("-", "")}.jpg",
