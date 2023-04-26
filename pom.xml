@@ -13,7 +13,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <kotlin.code.style>official</kotlin.code.style>
-        <kotlin.code.version>1.8.20</kotlin.code.version>
+        <kotlin.code.version>1.8.21</kotlin.code.version>
         <kotlin.compiler.jvmTarget>11</kotlin.compiler.jvmTarget>
         <main.class>fr.ziedelth.twitter.TwitterPlugin</main.class>
     </properties>
